@@ -17,12 +17,12 @@ dotest()
 	fi
 	cnt2=`wc -c test2 | (read a b; echo "$a")`
 	if ! expr "x$cnt2" : 'x[0-9][0-9]*$' > /dev/null; then
-		echo 'Could not count the characters in the test1 file'
+		echo 'Could not count the characters in the test2 file'
 		exit 1
 	fi
 	cnt3=`wc -c test3 | (read a b; echo "$a")`
 	if ! expr "x$cnt3" : 'x[0-9][0-9]*$' > /dev/null; then
-		echo 'Could not count the characters in the test1 file'
+		echo 'Could not count the characters in the test3 file'
 		exit 1
 	fi
 
