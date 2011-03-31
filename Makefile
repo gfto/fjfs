@@ -1,4 +1,9 @@
-CFLAGS = -ggdb -Wall -Wextra -Wshadow -Wformat-security -O2
+CFLAGS_DBG?=	-ggdb
+CFLAGS_OPT?=	-O2
+CFLAGS_WARN?=	-Wall -Wextra -Wshadow -Wformat-security
+
+CFLAGS?=	${CFLAGS_DBG} ${CFLAGS_OPT}
+CFLAGS+=	${CFLAGS_WARN}
 
 all: filejoinfs
 
