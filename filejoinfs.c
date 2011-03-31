@@ -79,7 +79,15 @@ struct files {
 
 struct files *filelist;
 
-struct files *files_alloc() {
+static struct files *files_alloc(void);
+static void files_free(struct files **pfiles);
+#ifdef DO_DUMP
+static void files_dump(struct files *files);
+#endif
+static int files_add_file(struct files *files, char *filename);
+static int files_load_filelist(struct files *files, char *filename);
+
+struct files *files_alloc(void) {
 	struct files *f = calloc(1, sizeof(struct files));
 	f->alloc_files = 64;
 	f->data = calloc(f->alloc_files, sizeof(struct fileinfo *));
@@ -103,6 +111,7 @@ void files_free(struct files **pfiles) {
 	}
 }
 
+#ifdef DO_DUMP
 void files_dump(struct files *files) {
 	int i;
 	fprintf(stdout,"num_files:%d\n", files->num_files);
@@ -115,6 +124,7 @@ void files_dump(struct files *files) {
 		fprintf(stdout,"file[%d]->size=%llu\n", i, f->size);
 	}
 }
+#endif
 
 int files_add_file(struct files *files, char *filename) {
 	int ret = 0;
