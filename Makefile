@@ -14,4 +14,4 @@ filejoinfs: filejoinfs.c
 	${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -o $@ filejoinfs.c ${LIBS}
 
 clean:
-	rm filejoinfs
+	rm -f filejoinfs
