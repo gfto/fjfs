@@ -1,0 +1,11 @@
+ulimit -c unlimited
+valgrind \
+	--log-file=filejoinfs-$(date +%F-%H:%M:%S).log \
+	--leak-check=full \
+	--show-reachable=yes \
+	--undef-value-errors=no \
+	--trace-children=yes \
+	--run-libc-freeres=yes \
+	--time-stamp=yes \
+		-- \
+	./filejoinfs test.txt
