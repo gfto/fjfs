@@ -6,9 +6,9 @@ License
 =======
 fjfs is released under BSD license.
 
-Installation
+Dependencies
 ============
-fjfs depends on libfuse.
+fjfs depends on libfuse - http://fuse.sourceforge.net/
 
 Documentation
 =============
