@@ -55,14 +55,14 @@ char *filenames;
 char *mountpoint;
 int mountpoint_created = 0;
 
-struct files *files_alloc(void) {
+static struct files *files_alloc(void) {
 	struct files *f = calloc(1, sizeof(struct files));
 	f->alloc_files = 64;
 	f->data = calloc(f->alloc_files, sizeof(struct fileinfo *));
 	return f;
 }
 
-void files_free(struct files **pfiles) {
+static void files_free(struct files **pfiles) {
 	struct files *files = *pfiles;
 	struct fileinfo *file;
 	int i;
@@ -94,7 +94,7 @@ void files_dump(struct files *files) {
 }
 #endif
 
-int files_add_file(struct files *files, char *filename) {
+static int files_add_file(struct files *files, char *filename) {
 	int ret = 0;
 	struct stat sb;
 	if (stat(filename, &sb) != -1) {
@@ -127,7 +127,7 @@ int files_add_file(struct files *files, char *filename) {
 	return ret;
 }
 
-int files_load_filelist(struct files *files, char *filename) {
+static int files_load_filelist(struct files *files, char *filename) {
 	size_t len;
 	ssize_t readed;
 	int ret = 0;
