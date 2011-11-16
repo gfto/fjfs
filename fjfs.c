@@ -241,12 +241,12 @@ int main(int argc, char *argv[]) {
 	struct stat sb;
 
 	if (argc < 3) {
-		fprintf(stderr, "Usage: %s filelist.txt mount-point-file\n", argv[0]);
+		fprintf(stderr, "Usage: %s mount-point-file filelist.txt\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	filenames  = argv[1];
-	mountpoint = argv[2];
+	mountpoint = argv[1];
+	filenames  = argv[2];
 
 	if (stat(mountpoint, &sb) == -1) {
 		FILE *f = fopen(mountpoint, "wb");

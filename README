@@ -11,16 +11,13 @@ To use it:
            echo /etc/issue >> filelist.txt
            echo /etc/passwd >> filelist.txt
 
-     3. Create an empty file over which the files in the list will be joined
-           touch joined.txt
+     3. Mount fjfs
+           ./fjfs joined.txt filelist.txt
 
-     4. Mount fjfs
-           ./fjfs filelist.txt joined.txt
-
-     5. Check the result with
+     4. Check the result with
            cat joined.txt
 
         You will see the contents of all the files listed in filelist.txt
 
-     6. Unmount the fs
-           fusermount -u joined.txt
+     5. Unmount the fs
+           fusermount -u joined.txt && rm joined.txt
