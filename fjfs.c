@@ -304,6 +304,7 @@ static const struct option long_options[] = {
 static void show_usage(void) {
 	printf("%s\n", program_id);
 	printf("FUSE module for virtual joining of multiple files into one.\n");
+	printf("Copyright (c) 2010-2011 Georgi Chorbadzhiyski\n");
 	printf("\n");
 	printf("Usage: fjfs [file-list-options] [options] mount-point-file file-list\n");
 	printf("\n");
