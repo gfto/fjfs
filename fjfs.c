@@ -79,14 +79,6 @@ struct files {
 
 struct files *filelist;
 
-static struct files *files_alloc(void);
-static void files_free(struct files **pfiles);
-#ifdef DO_DUMP
-static void files_dump(struct files *files);
-#endif
-static int files_add_file(struct files *files, char *filename);
-static int files_load_filelist(struct files *files, char *filename);
-
 struct files *files_alloc(void) {
 	struct files *f = calloc(1, sizeof(struct files));
 	f->alloc_files = 64;

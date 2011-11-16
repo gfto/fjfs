@@ -3,7 +3,7 @@ CFLAGS_OPT?=	-O2
 CFLAGS_WARN?=	-Wall -W -Wextra -Wshadow -Wformat-security \
 		-std=c99 -pedantic -Wbad-function-cast \
 		-Wcast-align -Wcast-qual -Wchar-subscripts -Winline \
-		-Wmissing-prototypes -Wnested-externs -Wpointer-arith \
+		-Wnested-externs -Wpointer-arith \
 		-Wredundant-decls -Wstrict-prototypes
 
 CFLAGS?=	${CFLAGS_DBG} ${CFLAGS_OPT}
