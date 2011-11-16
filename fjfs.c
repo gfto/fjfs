@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <error.h>
 #include <string.h>
+#include <getopt.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -50,10 +51,19 @@ struct files {
 	struct fileinfo **data;
 };
 
+enum fl_mode {
+	FL_FILE,
+	FL_GLOB,
+	FL_ARGS
+};
+
 struct files *filelist;
 char *filenames;
 char *mountpoint;
+int debug = 0;
+int allow_other = 0;
 int mountpoint_created = 0;
+enum fl_mode list_mode = FL_FILE;
 
 static struct files *files_alloc(void) {
 	struct files *f = calloc(1, sizeof(struct files));
@@ -236,17 +246,96 @@ static struct fuse_operations concatfs_op = {
 	.destroy	= fjfs_destroy,
 };
 
-int main(int argc, char *argv[]) {
-	int ret;
-	struct stat sb;
+static const char *short_options = "fgaohd";
 
-	if (argc < 3) {
-		fprintf(stderr, "Usage: %s mount-point-file filelist.txt\n", argv[0]);
+static const struct option long_options[] = {
+	{ "file", no_argument, NULL, 'f' },
+	{ "glob", no_argument, NULL, 'g' },
+	{ "args", no_argument, NULL, 'a' },
+	{ "allow-other", no_argument, NULL, 'o' },
+	{ "help", no_argument, NULL, 'h' },
+	{ "debug", no_argument, NULL, 'd' },
+	{ 0, 0, 0, 0 }
+};
+
+static void show_usage(void) {
+	printf("fjfs - FUSE module for virtual joining of multiple files into one.\n");
+	printf("\n");
+	printf("Usage: fjfs [file-list-options] [options] mount-point-file file-list\n");
+	printf("\n");
+	printf("Note: file-list depends on the options described bellow.\n");
+	printf("\n");
+	printf("File list options:\n");
+	printf(" -f --file | file-list is text file containing list of files (default).\n");
+	printf(" -g --glob | file-list is glob (*, ?, dir/file*).\n");
+	printf(" -a --args | file-list is N filenames (file1 file2 fileX).\n");
+	printf("\n");
+	printf("Examples:\n");
+	printf(" - Join files listed in filelist.txt as test-mount.txt\n");
+	printf("   fjfs test-mount.txt filelist.txt\n");
+	printf("\n");
+	printf(" - Join files named testfile*.txt as test-mount.txt\n");
+	printf("   fjfs --glob test-mount.txt 'testfile*.txt'\n");
+	printf("\n");
+	printf(" - Join files named testfileX.txt testfileY.txt testfileZ.txt as test-mount.txt\n");
+	printf("   fjfs --args test-mount.txt testfileX.txt testfileY.txt testfileZ.txt\n");
+	printf("\n");
+	printf("Other options:\n");
+	printf(" -o --allow-other | Mount FUSE with allow_other option. This allows other users\n");
+	printf("                  . to access the mounted fjfs instance. /etc/fuse.conf must\n");
+	printf("                  . contain \"user_allow_other\" in order for this option to work.\n");
+}
+
+static void parse_parameters(int argc, char *argv[]) {
+	int j;
+
+	while ( (j = getopt_long(argc, argv, short_options, long_options, NULL)) != -1 ) {
+		switch (j) {
+		case 'f': list_mode = FL_FILE; break;
+		case 'g': list_mode = FL_GLOB; break;
+		case 'a': list_mode = FL_ARGS; break;
+		case 'd': debug = 1; break;
+		case 'o': allow_other = 1; break;
+		case 'h':
+			show_usage();
+			exit(EXIT_SUCCESS);
+			break;
+		}
+	}
+
+	mountpoint = argv[optind];
+	filenames  = argv[optind + 1];
+
+	if (!mountpoint || !filenames) {
+		show_usage();
 		exit(EXIT_FAILURE);
 	}
 
-	mountpoint = argv[1];
-	filenames  = argv[2];
+	if (debug) {
+		fprintf(stderr, "mount point: %s\n", mountpoint);
+		switch (list_mode) {
+		case FL_FILE:
+			fprintf(stderr, "list (file) : %s\n", filenames);
+			break;
+		case FL_GLOB:
+			fprintf(stderr, "list (glob) : %s\n", filenames);
+			break;
+		case FL_ARGS:
+			fprintf(stderr, "list (args) :");
+			for (j = optind + 1; j < argc; j++) {
+				fprintf(stderr, " %s", argv[j]);
+			}
+			fprintf(stderr, "\n");
+			break;
+		}
+	}
+}
+
+int main(int argc, char *argv[]) {
+	int ret = EXIT_FAILURE;
+	struct stat sb;
+
+	parse_parameters(argc, argv);
 
 	if (stat(mountpoint, &sb) == -1) {
 		FILE *f = fopen(mountpoint, "wb");
