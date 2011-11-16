@@ -1,40 +1,74 @@
 #!/bin/sh
 
-set -e
-
-dotest()
-{
-	cat testmnt.txt
-	head -c 20 testmnt.txt
-	tail -c 20 testmnt.txt
-	head -c 160 testmnt.txt | tail -n 1
-	echo
-
-	cnt1=`wc -c test1 | (read a b; echo "$a")`
-	if ! expr "x$cnt1" : 'x[0-9][0-9]*$' > /dev/null; then
-		echo 'Could not count the characters in the test1 file'
-		exit 1
-	fi
-	cnt2=`wc -c test2 | (read a b; echo "$a")`
-	if ! expr "x$cnt2" : 'x[0-9][0-9]*$' > /dev/null; then
-		echo 'Could not count the characters in the test2 file'
-		exit 1
-	fi
-	cnt3=`wc -c test3 | (read a b; echo "$a")`
-	if ! expr "x$cnt3" : 'x[0-9][0-9]*$' > /dev/null; then
-		echo 'Could not count the characters in the test3 file'
-		exit 1
-	fi
-
-	head -c "$cnt1" testmnt.txt | diff -u test1 -
-	tail -c "$cnt3" testmnt.txt | diff -u test3 -
-	cat test1 test2 test3 | diff -u - testmnt.txt
+mount1_fjfs() {
+	echo "Using filelist.txt as input."
+	../fjfs --file mount-point filelist.txt
 }
 
-rm -f testmnt.txt
-res=0
-./mount.sh
-(dotest) || res=$?
-./umount.sh
-rm -f testmnt.txt
-exit "$res"
+mount2_fjfs() {
+	echo "Using glob 'test?' as input."
+	../fjfs --glob mount-point 'test?'
+}
+
+mount3_fjfs() {
+	echo "Using args 'test1 test2 test3' as input."
+	../fjfs --args mount-point test1 test2 test3
+}
+
+umount_fjfs() {
+	fusermount -u mount-point && rm mount-point
+	echo
+}
+
+do_tests() {
+	# Direct compare
+	diff -u expect_1 mount-point
+	if [ $? = 0 ]
+	then
+		echo "test 1: OK"
+	else
+		echo "test 1: FAIL!"
+	fi
+
+	head -n2 mount-point | tail -n1 > result_2
+	diff -u expect_2 result_2
+	if [ $? = 0 ]
+	then
+		echo "test 2: OK"
+	else
+		echo "test 2: FAIL!"
+	fi
+	rm result_2
+
+	head -c 120 mount-point > result_3
+	diff -u expect_3 result_3
+	if [ $? = 0 ]
+	then
+		echo "test 3: OK"
+	else
+		echo "test 3: FAIL!"
+	fi
+	rm result_3
+
+	tail -c 120 mount-point > result_4
+	diff -u expect_4 result_4
+	if [ $? = 0 ]
+	then
+		echo "test 4: OK"
+	else
+		echo "test 4: FAIL!"
+	fi
+	rm result_4
+}
+
+mount1_fjfs
+do_tests
+umount_fjfs
+
+mount2_fjfs
+do_tests
+umount_fjfs
+
+mount3_fjfs
+do_tests
+umount_fjfs
