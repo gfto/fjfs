@@ -35,6 +35,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <dirent.h>
+#include <libgen.h>
+#include <fnmatch.h>
 #include <fuse.h>
 
 /* Handle list of files */
@@ -89,8 +92,7 @@ static void files_free(struct files **pfiles) {
 	}
 }
 
-#if 0
-void files_dump(struct files *files) {
+static void files_dump(struct files *files) {
 	int i;
 	fprintf(stdout,"num_files:%d\n", files->num_files);
 	fprintf(stdout,"alloc_files:%d\n", files->alloc_files);
@@ -102,7 +104,6 @@ void files_dump(struct files *files) {
 		fprintf(stdout,"file[%d]->size=%llu\n", i, (unsigned long long)f->size);
 	}
 }
-#endif
 
 static int files_add_file(struct files *files, char *filename) {
 	int ret = 0;
@@ -158,6 +159,41 @@ static int files_load_filelist(struct files *files, char *filename) {
 
 	return ret;
 }
+
+static int files_load_glob(struct files *files, char *glob_match) {
+	int i, entries, ret = 0;
+	struct dirent **namelist;
+	char *f1 = strdup(glob_match);
+	char *f2 = strdup(glob_match);
+	char *dir  = dirname(f1);
+	char *match = basename(f2);
+
+	if (debug)
+		fprintf(stderr, "dir:%s match:%s req:%s\n", dir, match, glob_match);
+	entries = scandir(dir, &namelist, NULL, alphasort);
+	if (entries < 0) {
+		fprintf(stderr, "scandir %s : %s\n", dir, strerror(errno));
+		free(f1);
+		free(f2);
+		return 0;
+	}
+
+	char *filename = calloc(1, strlen(dir) + NAME_MAX + 16);
+	for (i=0;i<entries;i++) {
+		struct dirent *entry = namelist[i];
+		if (fnmatch(match, entry->d_name, FNM_PATHNAME) == 0) {
+			sprintf(filename, "%s/%s", dir, entry->d_name);
+			ret += files_add_file(files, filename);
+		}
+		free(entry);
+	}
+	free(filename);
+	free(namelist);
+	free(f1);
+	free(f2);
+	return ret;
+}
+
 
 static int fuse_getattr(const char *path, struct stat *stbuf) {
 	if (strcmp(path, "/") != 0)
@@ -331,6 +367,49 @@ static void parse_parameters(int argc, char *argv[]) {
 	}
 }
 
+static int init_filelist(int argc, char *argv[]) {
+	int i, ret = 0;
+
+	filelist = files_alloc();
+	if (!filelist)
+		return ret;
+
+	switch (list_mode) {
+	case FL_FILE:
+		ret = files_load_filelist(filelist, filenames);
+		break;
+	case FL_GLOB:
+		ret = files_load_glob(filelist, filenames);
+		break;
+	case FL_ARGS:
+		for (i = optind + 1; i < argc; i++) {
+			ret += files_add_file(filelist, argv[i]);
+		}
+		break;
+	}
+
+	if (debug)
+		files_dump(filelist);
+
+	if (!ret)
+		fprintf(stderr, "ERROR: No files were selected for joining.\n");
+
+	return ret;
+}
+
+static int mount_fuse(char *program_file) {
+	char *fuse_argv[5];
+	fuse_argv[0] = program_file;
+	fuse_argv[1] = mountpoint;
+	fuse_argv[2] = "-o";
+	if (!allow_other)
+		fuse_argv[3] = "nonempty,fsname=fjfs";
+	else
+		fuse_argv[3] = "nonempty,allow_other,fsname=fjfs";
+	fuse_argv[4]  = 0;
+	return fuse_main(4, fuse_argv, &concatfs_op, NULL);
+}
+
 int main(int argc, char *argv[]) {
 	int ret = EXIT_FAILURE;
 	struct stat sb;
@@ -353,23 +432,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	filelist = files_alloc();
-	if (!files_load_filelist(filelist, filenames)) {
-		fprintf(stderr, "Error no files loaded.\n");
-		files_free(&filelist);
-		if (mountpoint_created)
-			unlink(mountpoint);
-		exit(EXIT_FAILURE);
-	}
-
-	char *fuse_argv[5];
-	fuse_argv[0] = argv[0];
-	fuse_argv[1] = mountpoint;
-	fuse_argv[2] = "-o";
-	fuse_argv[3] = "nonempty,allow_other,fsname=fjfs";
-	fuse_argv[4]  = 0;
-
-	ret = fuse_main(4, fuse_argv, &concatfs_op, NULL);
+	if (init_filelist(argc, argv))
+		ret = mount_fuse(argv[0]);
 
 	if (mountpoint_created)
 		unlink(mountpoint);
