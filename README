@@ -12,8 +12,21 @@ fjfs depends on libfuse.
 
 Documentation
 =============
-fjfs is controlled using command line parameters. Run fjfs to
-see all of the parameters and explanation what every one of them does.
+fjfs is controlled using command line parameters.
+
+Usage: fjfs [file-list-options] [options] mount-point-file file-list
+
+Note: file-list depends on the options described bellow.
+
+File list options:
+ -f --file | file-list is text file containing list of files (default).
+ -g --glob | file-list is glob (*, ?, dir/file*).
+ -a --args | file-list is N filenames (file1 file2 fileX).
+
+Other options:
+ -o --allow-other | Mount FUSE with allow_other option. This allows other users
+                  . to access the mounted fjfs instance. /etc/fuse.conf must
+                  . contain "user_allow_other" in order for this option to work.
 
 Development
 ===========
