@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
 	fuse_argv[0] = argv[0];
 	fuse_argv[1] = mountpoint_file;
 	fuse_argv[2] = "-o";
-	fuse_argv[3] = "nonempty,allow_other,direct_io";
+	fuse_argv[3] = "nonempty,allow_other,fsname=fjfs";
 	fuse_argv[4]  = 0;
 
 	ret = fuse_main(4, fuse_argv, &concatfs_op, NULL);
