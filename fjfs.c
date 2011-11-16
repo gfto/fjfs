@@ -103,17 +103,17 @@ void files_free(struct files **pfiles) {
 	}
 }
 
-#ifdef DO_DUMP
+#if 0
 void files_dump(struct files *files) {
 	int i;
 	fprintf(stdout,"num_files:%d\n", files->num_files);
 	fprintf(stdout,"alloc_files:%d\n", files->alloc_files);
-	fprintf(stdout,"total_sizes:%lld\n", files->total_size);
+	fprintf(stdout,"total_sizes:%lld\n", (unsigned long long)files->total_size);
 	for (i=0; i<files->num_files; i++) {
 		struct fileinfo *f = files->data[i];
 		fprintf(stdout,"file[%d]->fd=%d\n", i, f->fd);
 		fprintf(stdout,"file[%d]->name=%s\n", i, f->name);
-		fprintf(stdout,"file[%d]->size=%llu\n", i, f->size);
+		fprintf(stdout,"file[%d]->size=%llu\n", i, (unsigned long long)f->size);
 	}
 }
 #endif
