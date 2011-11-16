@@ -1,6 +1,4 @@
-fjfs v1.0
-
-fjfs is a FUSE module that allows several files to be virtually joined into one.
+fjfs is FUSE module that implements virtual joining of multiple files as one.
 
 To compile the program run "make".
 

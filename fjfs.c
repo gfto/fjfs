@@ -1,53 +1,26 @@
 /*
-# fjfs
-# Quick'n'dirty FUSE module implementing joining of different files as one
-#
-# Copyright (c) 2010 Georgi Chorbadzhiyski (georgi@unixsol.org)
-# All rights reserved.
-#
-# Redistribution and use of this script, with or without modification, is
-# permitted provided that the following conditions are met:
-#
-# 1. Redistributions of this script must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#
-#  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
-#  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
-#  EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-#  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-#  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-#  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#  To compile the program run:
-#         gcc -Wall -Wextra `pkg-config fuse --cflags --libs` fjfs.c -lfuse -o fjfs
-#
-#  To use it:
-#       1. Install the FUSE module
-#             sudo modprobe fuse
-#
-#       2. Create the list of files to join
-#             echo /etc/group >> filelist.txt
-#             echo /etc/issue >> filelist.txt
-#             echo /etc/passwd >> filelist.txt
-#
-#       3. Create an empty file over which the files in the list will be joined
-#             touch joined.txt
-#
-#       4. Mount fjfs
-#             ./fjfs filelist.txt joined.txt
-#
-#       5. Check the result with
-#             cat joined.txt
-#
-#          You will see the contents of all the files listed in filelist.txt
-#
-#       6. Unmount the fs
-#             fusermount -u joined.txt
-#
+ * fjfs
+ * fjfs is FUSE module that implements virtual joining of multiple files as one.
+ *
+ * Copyright (c) 2010-2011 Georgi Chorbadzhiyski (georgi@unixsol.org)
+ * All rights reserved.
+ *
+ * Redistribution and use of this script, with or without modification, is
+ * permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of this script must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+ *  EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ *  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ *  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ *  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #define FUSE_USE_VERSION 26
