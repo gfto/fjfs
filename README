@@ -1,6 +1,36 @@
+fjfs (file-join-fs a.k.a. fudge-fs)
+===================================
 fjfs is FUSE module that implements virtual joining of multiple files as one.
 
-To compile the program run "make".
+License
+=======
+fjfs is released under BSD license.
+
+Installation
+============
+fjfs depends on libfuse.
+
+Documentation
+=============
+fjfs is controlled using command line parameters. Run fjfs to
+see all of the parameters and explanation what every one of them does.
+
+Development
+===========
+The development is tracked using git. The repository is hosted at github
+at http://github.com/gfto/fjfs
+
+Installation
+============
+Clone git repository and then run "make".
+
+   git clone git://github.com/gfto/fjfs.git
+   make
+   make install
+
+Quick start
+===========
+Install fjfs with "make install".
 
 To use it:
      1. Install the FUSE module
@@ -12,7 +42,7 @@ To use it:
            echo /etc/passwd >> filelist.txt
 
      3. Mount fjfs
-           ./fjfs joined.txt filelist.txt
+           fjfs joined.txt filelist.txt
 
      4. Check the result with
            cat joined.txt
@@ -21,3 +51,29 @@ To use it:
 
      5. Unmount the fs
            fusermount -u joined.txt && rm joined.txt
+
+More examples
+=============
+Join files listed in filelist.txt as test-mount.txt
+
+   fjfs test-mount.txt filelist.txt
+
+Join files named testfile*.txt as test-mount.txt
+
+   fjfs --glob test-mount.txt 'testfile*.txt'
+
+Join files named testfileX.txt testfileY.txt testfileZ.txt as test-mount.txt
+
+   fjfs --args test-mount.txt testfileX.txt testfileY.txt testfileZ.txt
+
+Releases
+========
+Official releases can be downloaded from fjfs home page which is
+
+   http://georgi.unixsol.org/programs/fjfs/
+
+Contact
+=======
+For patches, bug reports, complaints and so on send e-mail to
+
+   Georgi Chorbadzhiyski <georgi@unixsol.org>
