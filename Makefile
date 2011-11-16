@@ -1,3 +1,14 @@
+CC = $(CROSS)$(TARGET)gcc
+
+BUILD_ID = $(shell date +%F_%R)
+VERSION = $(shell cat RELEASE)
+GIT_VER = $(shell git describe --tags --dirty --always 2>/dev/null)
+ifeq "$(GIT_VER)" ""
+GIT_VER = "release"
+endif
+
+CFLAGS_BUILD = -DBUILD_ID=\"$(BUILD_ID)\" -DVERSION=\"$(VERSION)\" -DGIT_VER=\"$(GIT_VER)\"
+
 CFLAGS_DBG?=	-ggdb
 CFLAGS_OPT?=	-O2
 CFLAGS_WARN?=	-Wall -W -Wextra -Wshadow -Wformat-security \
@@ -7,7 +18,7 @@ CFLAGS_WARN?=	-Wall -W -Wextra -Wshadow -Wformat-security \
 		-Wredundant-decls -Wstrict-prototypes
 
 CFLAGS?=	${CFLAGS_DBG} ${CFLAGS_OPT}
-CFLAGS+=	${CFLAGS_WARN}
+CFLAGS+=	${CFLAGS_WARN} ${CFLAGS_BUILD}
 
 CFLAGS+=	`pkg-config --cflags fuse`
 LIBS+=		`pkg-config --libs fuse`

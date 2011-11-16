@@ -40,6 +40,8 @@
 #include <fnmatch.h>
 #include <fuse.h>
 
+static const char *program_id = "fjfs v" VERSION " (" GIT_VER ", build " BUILD_ID ")";
+
 /* Handle list of files */
 struct fileinfo {
 	int		fd;
@@ -300,7 +302,8 @@ static const struct option long_options[] = {
 };
 
 static void show_usage(void) {
-	printf("fjfs - FUSE module for virtual joining of multiple files into one.\n");
+	printf("%s\n", program_id);
+	printf("FUSE module for virtual joining of multiple files into one.\n");
 	printf("\n");
 	printf("Usage: fjfs [file-list-options] [options] mount-point-file file-list\n");
 	printf("\n");
