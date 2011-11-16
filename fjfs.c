@@ -270,9 +270,14 @@ static int fjfs_unlink(const char *path) {
 	return unlink(path);
 }
 
-static void fjfs_destroy(void *f __attribute__((unused))) {
+
+static void clear_mountpoint(void) {
 	if (mountpoint_created)
 		unlink(mountpoint);
+}
+
+static void fjfs_destroy(void *f __attribute__((unused))) {
+	clear_mountpoint();
 }
 
 static struct fuse_operations concatfs_op = {
@@ -367,6 +372,27 @@ static void parse_parameters(int argc, char *argv[]) {
 	}
 }
 
+static int prepare_mountpoint(void) {
+	struct stat sb;
+	if (stat(mountpoint, &sb) == -1) {
+		// Mount point do not exist.
+		FILE *f = fopen(mountpoint, "wb");
+		if (!f) {
+			fprintf(stderr, "Can't create mount point %s : %s\n", mountpoint, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		mountpoint_created = 1;
+		fclose(f);
+	} else {
+		// Mount exist, check if it is a file.
+		if (!S_ISREG(sb.st_mode)) {
+			fprintf(stderr, "Mount point \"%s\" is not a file!\n", mountpoint);
+			exit(EXIT_FAILURE);
+		}
+	}
+	return 1;
+}
+
 static int init_filelist(int argc, char *argv[]) {
 	int i, ret = 0;
 
@@ -412,31 +438,15 @@ static int mount_fuse(char *program_file) {
 
 int main(int argc, char *argv[]) {
 	int ret = EXIT_FAILURE;
-	struct stat sb;
 
 	parse_parameters(argc, argv);
 
-	if (stat(mountpoint, &sb) == -1) {
-		FILE *f = fopen(mountpoint, "wb");
-		if (f) {
-			mountpoint_created = 1;
-			fclose(f);
-		} else {
-			fprintf(stderr, "Can't create mount point %s : %s\n", mountpoint, strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-	} else {
-		if (!S_ISREG(sb.st_mode)) {
-			fprintf(stderr, "%s is not a file!\n", mountpoint);
-			exit(EXIT_FAILURE);
-		}
-	}
+	mountpoint_created = prepare_mountpoint();
 
 	if (init_filelist(argc, argv))
 		ret = mount_fuse(argv[0]);
 
-	if (mountpoint_created)
-		unlink(mountpoint);
+	clear_mountpoint();
 
 	files_free(&filelist);
 
