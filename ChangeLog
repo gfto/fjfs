@@ -1,0 +1,11 @@
+2011-11-16 : Version 2.0
+ * Added install/uninstall targets in the Makefile.
+ * FUSE's allow_other option is not used by default (use -o to enable it).
+ * File list can be described on the command line.
+ * File list can be described using wildcards on the command line.
+ * Added command line parsing using getopt_long.
+ * Create mount point if it doesn't exist.
+ * Move test files into test/ directory.
+
+2011-03-21 : Version 1.0
+ * Initial public release.
