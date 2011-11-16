@@ -51,6 +51,9 @@ struct files {
 };
 
 struct files *filelist;
+char *filenames;
+char *mountpoint;
+int mountpoint_created = 0;
 
 struct files *files_alloc(void) {
 	struct files *f = calloc(1, sizeof(struct files));
@@ -215,50 +218,72 @@ static int fuse_read(const char *path, char *buf, size_t size, off_t offset, str
 	return totreaden;
 }
 
+static int fjfs_unlink(const char *path) {
+	if (strcmp(path, "/") != 0)
+		return -ENOENT;
+	return unlink(path);
+}
+
+static void fjfs_destroy(void *f __attribute__((unused))) {
+	if (mountpoint_created)
+		unlink(mountpoint);
+}
+
 static struct fuse_operations concatfs_op = {
 	.getattr	= fuse_getattr,
 	.read		= fuse_read,
+	.unlink		= fjfs_unlink,
+	.destroy	= fjfs_destroy,
 };
 
 int main(int argc, char *argv[]) {
 	int ret;
-	char *filenames;
-	char *mountpoint_file;
 	struct stat sb;
 
 	if (argc < 3) {
-		fprintf(stderr, "Usage: fjfs filelist.txt mount-point-file\n");
+		fprintf(stderr, "Usage: %s filelist.txt mount-point-file\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	filenames = argv[1];
-	mountpoint_file = argv[2];
+	filenames  = argv[1];
+	mountpoint = argv[2];
 
-	if (stat(mountpoint_file, &sb) == -1) {
-		fprintf(stderr, "Can't mount on %s : %s\n", mountpoint_file, strerror(errno));
-		exit(EXIT_FAILURE);
+	if (stat(mountpoint, &sb) == -1) {
+		FILE *f = fopen(mountpoint, "wb");
+		if (f) {
+			mountpoint_created = 1;
+			fclose(f);
+		} else {
+			fprintf(stderr, "Can't create mount point %s : %s\n", mountpoint, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
 	} else {
 		if (!S_ISREG(sb.st_mode)) {
-			fprintf(stderr, "%s is not a file!\n", mountpoint_file);
+			fprintf(stderr, "%s is not a file!\n", mountpoint);
 			exit(EXIT_FAILURE);
 		}
 	}
 
 	filelist = files_alloc();
 	if (!files_load_filelist(filelist, filenames)) {
-		fprintf(stderr, "Error no files loaded from %s.\n", argv[1]);
+		fprintf(stderr, "Error no files loaded.\n");
 		files_free(&filelist);
+		if (mountpoint_created)
+			unlink(mountpoint);
 		exit(EXIT_FAILURE);
 	}
 
 	char *fuse_argv[5];
 	fuse_argv[0] = argv[0];
-	fuse_argv[1] = mountpoint_file;
+	fuse_argv[1] = mountpoint;
 	fuse_argv[2] = "-o";
 	fuse_argv[3] = "nonempty,allow_other,fsname=fjfs";
 	fuse_argv[4]  = 0;
 
 	ret = fuse_main(4, fuse_argv, &concatfs_op, NULL);
+
+	if (mountpoint_created)
+		unlink(mountpoint);
 
 	files_free(&filelist);
 
