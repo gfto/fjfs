@@ -1,5 +1,5 @@
 /*
-# filejoinfs v1.0
+# fjfs
 # Quick'n'dirty FUSE module implementing joining of different files as one
 #
 # Copyright (c) 2010 Georgi Chorbadzhiyski (georgi@unixsol.org)
@@ -23,7 +23,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #  To compile the program run:
-#         gcc -Wall -Wextra `pkg-config fuse --cflags --libs` filejoinfs.c -lfuse -o filejoinfs
+#         gcc -Wall -Wextra `pkg-config fuse --cflags --libs` fjfs.c -lfuse -o fjfs
 #
 #  To use it:
 #       1. Install the FUSE module
@@ -37,8 +37,8 @@
 #       3. Create an empty file over which the files in the list will be joined
 #             touch joined.txt
 #
-#       4. Mount filejoinfs
-#             ./filejoinfs filelist.txt joined.txt
+#       4. Mount fjfs
+#             ./fjfs filelist.txt joined.txt
 #
 #       5. Check the result with
 #             cat joined.txt
@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
 	struct stat sb;
 
 	if (argc < 3) {
-		fprintf(stderr, "Usage: filejoinfs filelist.txt mount-point-file\n");
+		fprintf(stderr, "Usage: fjfs filelist.txt mount-point-file\n");
 		exit(EXIT_FAILURE);
 	}
 

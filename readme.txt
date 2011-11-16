@@ -1,6 +1,6 @@
-filejoinfs v1.0
+fjfs v1.0
 
-filejoinfs is a FUSE module that allows several files to be joined into one.
+fjfs is a FUSE module that allows several files to be virtually joined into one.
 
 To compile the program run "make".
 
@@ -16,8 +16,8 @@ To use it:
      3. Create an empty file over which the files in the list will be joined
            touch joined.txt
 
-     4. Mount filejoinfs
-           ./filejoinfs filelist.txt joined.txt
+     4. Mount fjfs
+           ./fjfs filelist.txt joined.txt
 
      5. Check the result with
            cat joined.txt

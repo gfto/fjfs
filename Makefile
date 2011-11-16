@@ -12,10 +12,10 @@ CFLAGS+=	${CFLAGS_WARN}
 CFLAGS+=	`pkg-config --cflags fuse`
 LIBS+=		`pkg-config --libs fuse`
 
-all: filejoinfs
+all: fjfs
 
-filejoinfs: filejoinfs.c
-	${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -o $@ filejoinfs.c ${LIBS}
+fjfs: fjfs.c
+	${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -o $@ fjfs.c ${LIBS}
 
 clean:
-	rm -f filejoinfs
+	rm -f fjfs

@@ -1,6 +1,6 @@
 ulimit -c unlimited
 valgrind \
-	--log-file=filejoinfs-$(date +%F-%H:%M:%S).log \
+	--log-file=fjfs-$(date +%F-%H:%M:%S).log \
 	--leak-check=full \
 	--show-reachable=yes \
 	--undef-value-errors=no \
@@ -8,4 +8,4 @@ valgrind \
 	--run-libc-freeres=yes \
 	--time-stamp=yes \
 		-- \
-	./filejoinfs test.txt
+	./fjfs test.txt
