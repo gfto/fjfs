@@ -329,6 +329,7 @@ static void show_usage(void) {
 	printf(" -o --allow-other | Mount FUSE with allow_other option. This allows other users\n");
 	printf("                  . to access the mounted fjfs instance. /etc/fuse.conf must\n");
 	printf("                  . contain \"user_allow_other\" in order for this option to work.\n");
+	printf("\n");
 }
 
 static void parse_parameters(int argc, char *argv[]) {
